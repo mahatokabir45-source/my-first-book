@@ -1,307 +1,827 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My Book</title>
-  <style>
-    /* General Body Styles */
-    body {
-      font-family: 'Georgia', serif;
-      background-color: #fff8f0;
-      color: #333;
-      margin: 0;
-      padding: 0;
-      line-height: 1.8;
-      transition: background-color 0.3s, color 0.3s;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Board</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2c3e50;
+            --light-bg: #f8f9fa;
+            --dark-bg: #212529;
+            --light-text: #212529;
+            --dark-text: #f8f9fa;
+            --border-color: #dee2e6;
+        }
 
-    /* Header */
-    header {
-      text-align: center;
-      padding: 50px 20px 20px 20px;
-      background-color: #ffefeb;
-    }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
 
-    header h1 {
-      font-size: 3rem;
-      margin: 0;
-      color: #d9534f;
-      font-style: italic;
-    }
+        body.dark-mode {
+            background-color: var(--dark-bg);
+            color: var(--dark-text);
+        }
 
-    header p {
-      font-size: 1.2rem;
-      color: #080808;
-    }
+        .dark-mode .card {
+            background-color: #343a40;
+            border-color: #495057;
+        }
 
-    /* Chapters */
-    .chapter {
-      max-width: 800px;
-      margin: 40px auto;
-      padding: 30px;
-      background-color: #fff0f5;
-      border-radius: 15px;
-      box-shadow: 2px 2px 12px rgba(39, 39, 39, 0.1);
-    }
+        .dark-mode .btn-outline-secondary {
+            color: #adb5bd;
+            border-color: #adb5bd;
+        }
 
-    .chapter h2 {
-      font-size: 2rem;
-      color: #d9534f;
-      margin-bottom: 20px;
-    }
+        .dark-mode .btn-outline-secondary:hover {
+            background-color: #adb5bd;
+            color: #212529;
+        }
 
-    .chapter p {
-      font-size: 1.2rem;
-      color: #333;
-      margin-bottom: 15px;
-    }
+        .dark-mode .text-muted {
+            color: #adb5bd !important;
+        }
 
-    /* Footer */
-    footer {
-      text-align: center;
-      padding: 30px 20px;
-      background-color: #ffefeb;
-      font-size: 1rem;
-      color: #555;
-    }
+        .dark-mode .bg-light {
+            background-color: #343a40 !important;
+        }
 
-    /* Dark Mode */
-    body.dark {
-      background-color: #1e1e1e;
-      color: #f0f0f0;
-    }
+        .dark-mode .border {
+            border-color: #495057 !important;
+        }
 
-    body.dark .chapter {
-      background-color: #333;
-      color: #161616;
-    }
+        .dark-mode .form-control {
+            background-color: #495057;
+            border-color: #6c757d;
+            color: #f8f9fa;
+        }
 
-    body.dark header, body.dark footer {
-      background-color: #222;
-      color: #f0f0f0;
-    }
+        .dark-mode .form-control:focus {
+            background-color: #495057;
+            color: #f8f9fa;
+        }
 
-    /* Button */
-    #theme-toggle {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      padding: 10px 15px;
-      background-color: #d9534f;
-      color: rgb(15, 15, 15);
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      font-size: 1rem;
-    }
+        .header {
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 1rem;
+        }
 
-    #theme-toggle:hover {
-      background-color: #c9302c;
-    }
-  </style>
+        .dark-mode .header {
+            border-bottom-color: #495057;
+        }
+
+        .canvas-container {
+            position: relative;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+            background-color: white;
+            height: 500px;
+            margin-bottom: 1rem;
+        }
+
+        .dark-mode .canvas-container {
+            background-color: #343a40;
+        }
+
+        #drawingCanvas {
+            cursor: crosshair;
+            display: block;
+        }
+
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 1rem;
+            padding: 1rem;
+            background-color: var(--light-bg);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .dark-mode .toolbar {
+            background-color: #343a40;
+        }
+
+        .color-palette {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+
+        .color-btn {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 2px solid #fff;
+            cursor: pointer;
+            transition: transform 0.2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .color-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .color-btn.active {
+            border: 3px solid #333;
+            transform: scale(1.15);
+        }
+
+        .tool-btn {
+            padding: 8px 16px;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .tool-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .tool-btn.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .brush-size-slider {
+            width: 100px;
+        }
+
+        .word-selection {
+            position: absolute;
+            background-color: rgba(59, 130, 246, 0.3);
+            border: 1px dashed #3b82f6;
+            pointer-events: none;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 4px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            z-index: 1000;
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: opacity 0.3s, transform 0.3s;
+        }
+
+        .notification.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .feature-card {
+            margin-bottom: 1.5rem;
+            transition: transform 0.2s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stats-panel {
+            background-color: var(--light-bg);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .dark-mode .stats-panel {
+            background-color: #343a40;
+        }
+
+        .history-panel {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+    </style>
 </head>
 <body>
+    <div class="container-fluid">
+        <!-- Header -->
+        <div class="header">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h1 class="h3 mb-0">
+                        <i class="fas fa-chalkboard mr-2"></i>
+                        Smart Board
+                    </h1>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <button id="darkModeToggle" class="btn btn-outline-secondary">
+                        <i class="fas fa-moon"></i>
+                        <span class="ms-2">Dark Mode</span>
+                    </button>
+                    <button id="clearCanvas" class="btn btn-outline-danger ms-2">
+                        <i class="fas fa-trash"></i>
+                        Clear
+                    </button>
+                    <button id="downloadCanvas" class="btn btn-outline-success ms-2">
+                        <i class="fas fa-download"></i>
+                        Download
+                    </button>
+                </div>
+            </div>
+        </div>
 
-  <!-- Theme Toggle Button -->
-  <button id="theme-toggle">Dark/Light</button>
+        <!-- Main Content -->
+        <div class="row">
+            <!-- Left Sidebar -->
+            <div class="col-md-3">
+                <div class="card feature-card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Tools</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-outline-primary tool-btn active" data-tool="pen">
+                                <i class="fas fa-pen"></i> Pen
+                            </button>
+                            <button class="btn btn-outline-secondary tool-btn" data-tool="eraser">
+                                <i class="fas fa-eraser"></i> Eraser
+                            </button>
+                            <button class="btn btn-outline-secondary tool-btn" data-tool="text">
+                                <i class="fas fa-font"></i> Text
+                            </button>
+                            <button class="btn btn-outline-secondary tool-btn" data-tool="select">
+                                <i class="fas fa-mouse-pointer"></i> Select
+                            </button>
+                        </div>
+                    </div>
+                </div>
 
-  <!-- Header -->
-  <header>
-    <h1>My First Book</h1>
-    <p>Written by Kabir Mahato</p>
-  </header>
+                <div class="card feature-card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Brush Size</h5>
+                    </div>
+                    <div class="card-body">
+                        <input type="range" class="form-range brush-size-slider" id="brushSize" min="1" max="50" value="5">
+                        <div class="text-center mt-2">
+                            <span id="brushSizeValue">5px</span>
+                        </div>
+                    </div>
+                </div>
 
-  <!-- Chapter 1 -->
-  <div class="chapter">
-    <h2>Chapter 1: Beginnings</h2>
-    <p>
-      This is the start of my journey. I am very excited to share this story with you. Every page is filled with my thoughts, experiences, and imagination.
-    </p>
-    <p>
-      As I turn each chapter, I hope the readers feel the adventure, the emotions, and the creativity that went into writing it.
-    </p>
-  </div>
+                <div class="card feature-card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Colors</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="color-palette">
+                            <div class="color-btn active" style="background-color: #000000" data-color="#000000"></div>
+                            <div class="color-btn" style="background-color: #ff0000" data-color="#ff0000"></div>
+                            <div class="color-btn" style="background-color: #00ff00" data-color="#00ff00"></div>
+                            <div class="color-btn" style="background-color: #0000ff" data-color="#0000ff"></div>
+                            <div class="color-btn" style="background-color: #ffff00" data-color="#ffff00"></div>
+                            <div class="color-btn" style="background-color: #ff00ff" data-color="#ff00ff"></div>
+                            <div class="color-btn" style="background-color: #00ffff" data-color="#00ffff"></div>
+                            <div class="color-btn" style="background-color: #ffa500" data-color="#ffa500"></div>
+                            <div class="color-btn" style="background-color: #800080" data-color="#800080"></div>
+                            <div class="color-btn" style="background-color: #ffc0cb" data-color="#ffc0cb"></div>
+                            <div class="color-btn" style="background-color: #a52a2a" data-color="#a52a2a"></div>
+                            <div class="color-btn" style="background-color: #808080" data-color="#808080"></div>
+                        </div>
+                    </div>
+                </div>
 
-  <!-- Chapter 2 -->
-  <div class="chapter">
-    <h2>Chapter 2: Adventure</h2>
-    <p>
-      The story continues with challenges and discoveries. Each character grows and each experience teaches something new.
-    </p>
-  </div>
+                <div class="card feature-card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Text Settings</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="fontSize" class="form-label">Font Size</label>
+                            <select class="form-select" id="fontSize">
+                                <option value="12">12px</option>
+                                <option value="14">14px</option>
+                                <option value="16" selected>16px</option>
+                                <option value="18">18px</option>
+                                <option value="20">20px</option>
+                                <option value="24">24px</option>
+                                <option value="28">28px</option>
+                                <option value="32">32px</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="fontFamily" class="form-label">Font Family</label>
+                            <select class="form-select" id="fontFamily">
+                                <option value="Arial">Arial</option>
+                                <option value="Times New Roman">Times New Roman</option>
+                                <option value="Courier New">Courier New</option>
+                                <option value="Georgia">Georgia</option>
+                                <option value="Verdana">Verdana</option>
+                                <option value="Comic Sans MS">Comic Sans MS</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-  <div class="chapter">
-    <h2>chapter 3: entering into the unverse</h2>
-    <p>
-      As the journey continues, new challenges appear on the horizon. Each step teaches me something about life, courage, and the power of imagination.
-  </p>
-  <p>
-    Meeting new characters and facing unexpected events fills the story with excitement and emotion. Every decision shapes the path ahead, making each moment meaningful.
-  </p>
-  </div>
+            <!-- Main Canvas Area -->
+            <div class="col-md-6">
+                <div class="canvas-container">
+                    <canvas id="drawingCanvas"></canvas>
+                </div>
+                
+                <!-- Stats Panel -->
+                <div class="stats-panel">
+                    <div class="row">
+                        <div class="col-4">
+                            <div class="text-center">
+                                <h6 class="text-muted">Strokes</h6>
+                                <h4 id="strokeCount">0</h4>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="text-center">
+                                <h6 class="text-muted">Words</h6>
+                                <h4 id="wordCount">0</h4>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="text-center">
+                                <h6 class="text-muted">Selections</h6>
+                                <h4 id="selectionCount">0</h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-  <div class="chapter">
-    <h2>chapter 4: the mystery beyond</h2>
-    <p>
-     As I ventured deeper into the unknown, the world around me began to change. Strange landscapes stretched as far as the eye could see, and the air was filled with a sense of magic and possibility. Every step felt like a discovery.
-  </p>
-  <p>
-    I met unusual creatures and encountered puzzles that tested my courage and wit. Each challenge pushed me to think differently, reminding me that growth often comes from stepping outside your comfort zone.
-  </p>
-  <p>
-    The more I explored, the more I realized that the universe is not just a place, but a journey — one where imagination, courage, and friendship light the way.
-  </p>
-  </div>
+            <!-- Right Sidebar -->
+            <div class="col-md-3">
+                <div class="card feature-card">
+                    <div class="card-header">
+                        <h5 class="mb-0">History</h5>
+                    </div>
+                    <div class="card-body history-panel">
+                        <div id="historyList" class="list-group">
+                            <div class="list-group-item text-muted">No actions yet</div>
+                        </div>
+                    </div>
+                </div>
 
-  <!-- Chapter 5 -->
-<div class="chapter">
-  <h2>Chapter 5: Secrets of the Hidden Realm</h2>
-  <p>
-    Beyond the familiar lands, I discovered a hidden realm, shimmering with colors I had never seen before. The air was alive with whispers, and every shadow seemed to hold a secret waiting to be revealed.
-  </p>
-  <p>
-    I met guardians of this realm who guided me through ancient mysteries. Their knowledge was vast, yet they challenged me to find my own answers, teaching me that true wisdom comes from exploration and understanding.
-  </p>
-  <p>
-    Every moment in the hidden realm was magical, yet I felt the pull of home and the world I had left behind. I realized that adventure is not just about discovering new places, but also discovering who you truly are.
-  </p>
-</div>
+                <div class="card feature-card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Quick Actions</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-outline-primary" id="undoBtn">
+                                <i class="fas fa-undo"></i> Undo
+                            </button>
+                            <button class="btn btn-outline-primary" id="redoBtn">
+                                <i class="fas fa-redo"></i> Redo
+                            </button>
+                            <button class="btn btn-outline-info" id="saveBtn">
+                                <i class="fas fa-save"></i> Save Board
+                            </button>
+                        </div>
+                    </div>
+                </div>
 
-<!-- Chapter 6 -->
-<div class="chapter">
-  <h2>Chapter 6: The Enchanted Forest</h2>
-  <p>
-    Entering the enchanted forest, the trees seemed alive, whispering secrets of ages past. Shadows danced, and magical lights guided the path ahead.
-  </p>
-  <p>
-    I learned to listen to the forest and its creatures, realizing that nature itself held wisdom I had never noticed before.
-  </p>
-</div>
+                <div class="card feature-card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Share</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="input-group mb-3">
+                            <input type="text" class="form-control" id="shareLink" placeholder="Share link" readonly>
+                            <button class="btn btn-outline-secondary" type="button" id="copyLink">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                        <div class="d-grid">
+                            <button class="btn btn-outline-primary" id="shareBtn">
+                                <i class="fas fa-share-alt"></i> Generate Link
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-<!-- Chapter 7 -->
-<div class="chapter">
-  <h2>Chapter 7: Trials of Courage</h2>
-  <p>
-    The forest tested my courage through riddles and challenges. Every obstacle strengthened my mind and spirit, teaching me that bravery is not the absence of fear, but the decision to move forward despite it.
-  </p>
-</div>
+    <!-- Notification -->
+    <div id="notification" class="notification">
+        <span id="notificationText"></span>
+    </div>
 
-<!-- Chapter 8 -->
-<div class="chapter">
-  <h2>Chapter 8: The Celestial Lake</h2>
-  <p>
-    A shimmering lake appeared, reflecting stars that seemed closer than the night sky itself. Here, I reflected on my journey and discovered a deeper connection with the universe.
-  </p>
-</div>
+    <!-- Text Input Modal -->
+    <div class="modal fade" id="textModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Text</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="text" class="form-control" id="textInput" placeholder="Enter your text">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="addTextBtn">Add Text</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-<!-- Chapter 9 -->
-<div class="chapter">
-  <h2>Chapter 9: Friends in Unexpected Places</h2>
-  <p>
-    Along the way, I met travelers who became companions. Together, we shared knowledge, laughter, and faced dangers, proving that friendship makes the hardest paths easier.
-  </p>
-</div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Canvas setup
+            const canvas = document.getElementById('drawingCanvas');
+            const ctx = canvas.getContext('2d');
+            const canvasContainer = document.querySelector('.canvas-container');
+            
+            // Set canvas size
+            function resizeCanvas() {
+                canvas.width = canvasContainer.clientWidth;
+                canvas.height = canvasContainer.clientHeight;
+            }
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
 
-<!-- Chapter 10 -->
-<div class="chapter">
-  <h2>Chapter 10: Whispering Mountains</h2>
-  <p>
-    Climbing the whispering mountains, every peak revealed new mysteries. The wind carried messages of courage, patience, and perseverance, guiding me onward.
-  </p>
-</div>
+            // Drawing state
+            let isDrawing = false;
+            let currentTool = 'pen';
+            let currentColor = '#000000';
+            let brushSize = 5;
+            let history = [];
+            let historyStep = -1;
+            let strokeCount = 0;
+            let wordCount = 0;
+            let selectionCount = 0;
+            let textPosition = null;
+            let isSelecting = false;
+            let selectionStart = null;
+            let selectionEnd = null;
+            let selectedWords = [];
 
-<!-- Chapter 11 -->
-<div class="chapter">
-  <h2>Chapter 11: The Forgotten City</h2>
-  <p>
-    In a city hidden from time, ancient knowledge awaited. Ruins and murals told stories of civilizations long gone, reminding me that every journey is built on the lessons of the past.
-  </p>
-</div>
+            // Save initial state
+            saveState();
 
-<!-- Chapter 12 -->
-<div class="chapter">
-  <h2>Chapter 12: Magic of the Mind</h2>
-  <p>
-    I discovered that true magic lies in thought, creativity, and imagination. By believing in possibilities, I unlocked doors that were invisible to those who doubted.
-  </p>
-</div>
+            // Tool selection
+            document.querySelectorAll('.tool-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    currentTool = this.dataset.tool;
+                    
+                    if (currentTool === 'select') {
+                        canvas.style.cursor = 'default';
+                    } else {
+                        canvas.style.cursor = 'crosshair';
+                    }
+                });
+            });
 
-<!-- Chapter 13 -->
-<div class="chapter">
-  <h2>Chapter 13: The Guardian’s Challenge</h2>
-  <p>
-    A guardian appeared, testing not strength, but wisdom. To proceed, I had to solve puzzles that taught patience, insight, and strategy — qualities every explorer needs.
-  </p>
-</div>
+            // Color selection
+            document.querySelectorAll('.color-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    currentColor = this.dataset.color;
+                });
+            });
 
-<!-- Chapter 14 -->
-<div class="chapter">
-  <h2>Chapter 14: Paths of Light</h2>
-  <p>
-    Lighted pathways led me through darkness. I realized that even when the way seems unclear, hope and clarity can guide the steps forward.
-  </p>
-</div>
+            // Brush size
+            const brushSizeSlider = document.getElementById('brushSize');
+            const brushSizeValue = document.getElementById('brushSizeValue');
+            brushSizeSlider.addEventListener('input', function() {
+                brushSize = this.value;
+                brushSizeValue.textContent = `${brushSize}px`;
+            });
 
-<!-- Chapter 15 -->
-<div class="chapter">
-  <h2>Chapter 15: The Tower of Knowledge</h2>
-  <p>
-    Atop the Tower of Knowledge, I found scrolls, books, and wisdom collected through centuries. I understood that learning is a lifelong adventure.
-  </p>
-</div>
+            // Dark mode toggle
+            const darkModeToggle = document.getElementById('darkModeToggle');
+            darkModeToggle.addEventListener('click', function() {
+                document.body.classList.toggle('dark-mode');
+                const icon = this.querySelector('i');
+                if (document.body.classList.contains('dark-mode')) {
+                    icon.classList.remove('fa-moon');
+                    icon.classList.add('fa-sun');
+                    this.innerHTML = '<i class="fas fa-sun"></i><span class="ms-2">Light Mode</span>';
+                } else {
+                    icon.classList.remove('fa-sun');
+                    icon.classList.add('fa-moon');
+                    this.innerHTML = '<i class="fas fa-moon"></i><span class="ms-2">Dark Mode</span>';
+                }
+            });
 
-<!-- Chapter 16 -->
-<div class="chapter">
-  <h2>Chapter 16: Crossing the River of Time</h2>
-  <p>
-    The river taught me that every moment flows and that patience is key. I learned to accept the past, embrace the present, and move toward the future with intention.
-  </p>
-</div>
+            // Drawing functions
+            function startDrawing(e) {
+                if (currentTool === 'select') {
+                    isSelecting = true;
+                    selectionStart = getMousePos(e);
+                    return;
+                }
+                
+                if (currentTool === 'text') {
+                    textPosition = getMousePos(e);
+                    const textModal = new bootstrap.Modal(document.getElementById('textModal'));
+                    textModal.show();
+                    return;
+                }
 
-<!-- Chapter 17 -->
-<div class="chapter">
-  <h2>Chapter 17: Echoes of the Past</h2>
-  <p>
-    Ancient echoes guided me, revealing stories and lessons I had missed before. Listening to history gave me perspective and courage for the challenges ahead.
-  </p>
-</div>
+                isDrawing = true;
+                const pos = getMousePos(e);
+                
+                ctx.beginPath();
+                ctx.moveTo(pos.x, pos.y);
+                
+                if (currentTool === 'eraser') {
+                    ctx.globalCompositeOperation = 'destination-out';
+                } else {
+                    ctx.globalCompositeOperation = 'source-over';
+                    ctx.strokeStyle = currentColor;
+                }
+                
+                ctx.lineWidth = brushSize;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+            }
 
-<!-- Chapter 18 -->
-<div class="chapter">
-  <h2>Chapter 18: The Bridge of Dreams</h2>
-  <p>
-    Crossing the bridge, I entered a realm where imagination shaped reality. Every dream felt tangible, teaching me that creativity is a force capable of change.
-  </p>
-</div>
+            function draw(e) {
+                if (!isDrawing && !isSelecting) return;
+                
+                if (isSelecting) {
+                    const currentPos = getMousePos(e);
+                    drawSelectionBox(selectionStart, currentPos);
+                    return;
+                }
+                
+                const pos = getMousePos(e);
+                ctx.lineTo(pos.x, pos.y);
+                ctx.stroke();
+            }
 
-<!-- Chapter 19 -->
-<div class="chapter">
-  <h2>Chapter 19: Confronting the Unknown</h2>
-  <p>
-    The unknown tested every skill I had gained. Facing fears, I discovered resilience, courage, and the thrill of venturing where few have dared.
-  </p>
-</div>
+            function stopDrawing() {
+                if (isDrawing) {
+                    isDrawing = false;
+                    ctx.beginPath();
+                    saveState();
+                    updateStats();
+                }
+                
+                if (isSelecting) {
+                    isSelecting = false;
+                    selectionEnd = getMousePos(event);
+                    processSelection();
+                }
+            }
 
-<!-- Chapter 20 -->
-<div class="chapter">
-  <h2>Chapter 20: Homecoming</h2>
-  <p>
-    Returning home, I carried the wisdom, friendships, and experiences of the journey. I realized that every adventure shapes who we are and that the end of one path is only the beginning of another.
-  </p>
-</div>
-  <!-- Footer -->
-  <footer>
-    © 2026 Kabir Mahato. All rights reserved.
-  </footer>
+            function getMousePos(e) {
+                const rect = canvas.getBoundingClientRect();
+                return {
+                    x: e.clientX - rect.left,
+                    y: e.clientY - rect.top
+                };
+            }
 
-  <script>
-    // Dark/Light Mode Toggle
-    const toggleBtn = document.getElementById('theme-toggle');
-    toggleBtn.addEventListener('click', () => {
-      document.body.classList.toggle('dark');
-    });
-  </script>
+            function drawSelectionBox(start, end) {
+                // Clear canvas and redraw from history
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                if (historyStep >= 0) {
+                    ctx.putImageData(history[historyStep], 0, 0);
+                }
+                
+                // Draw selection box
+                ctx.strokeStyle = '#3b82f6';
+                ctx.lineWidth = 1;
+                ctx.setLineDash([5, 5]);
+                ctx.strokeRect(
+                    start.x, 
+                    start.y, 
+                    end.x - start.x, 
+                    end.y - start.y
+                );
+                ctx.setLineDash([]);
+            }
+
+            function processSelection() {
+                // Simulate word selection
+                const words = ['Hello', 'World', 'Smart', 'Board', 'Drawing', 'Text', 'Select', 'Color', 'Eraser'];
+                const selectedWord = words[Math.floor(Math.random() * words.length)];
+                
+                // Highlight selected area
+                ctx.fillStyle = 'rgba(59, 130, 246, 0.1)';
+                ctx.fillRect(
+                    selectionStart.x, 
+                    selectionStart.y, 
+                    selectionEnd.x - selectionStart.x, 
+                    selectionEnd.y - selectionStart.y
+                );
+                
+                // Add word to selected words
+                if (!selectedWords.includes(selectedWord)) {
+                    selectedWords.push(selectedWord);
+                    selectionCount++;
+                    updateStats();
+                    addToHistory(`Selected word: ${selectedWord}`);
+                }
+                
+                showNotification(`Word "${selectedWord}" selected!`);
+            }
+
+            // Text functionality
+            document.getElementById('addTextBtn').addEventListener('click', function() {
+                const text = document.getElementById('textInput').value;
+                if (text) {
+                    ctx.font = `${document.getElementById('fontSize').value}px ${document.getElementById('fontFamily').value}`;
+                    ctx.fillStyle = currentColor;
+                    ctx.fillText(text, textPosition.x, textPosition.y);
+                    
+                    wordCount++;
+                    updateStats();
+                    addToHistory(`Added text: ${text}`);
+                    showNotification('Text added successfully!');
+                    
+                    document.getElementById('textInput').value = '';
+                    bootstrap.Modal.getInstance(document.getElementById('textModal')).hide();
+                    saveState();
+                }
+            });
+
+            // Canvas event listeners
+            canvas.addEventListener('mousedown', startDrawing);
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('mouseup', stopDrawing);
+            canvas.addEventListener('mouseout', stopDrawing);
+
+            // Touch support
+            canvas.addEventListener('touchstart', function(e) {
+                e.preventDefault();
+                const touch = e.touches[0];
+                const mouseEvent = new MouseEvent('mousedown', {
+                    clientX: touch.clientX,
+                    clientY: touch.clientY
+                });
+                canvas.dispatchEvent(mouseEvent);
+            });
+
+            canvas.addEventListener('touchmove', function(e) {
+                e.preventDefault();
+                const touch = e.touches[0];
+                const mouseEvent = new MouseEvent('mousemove', {
+                    clientX: touch.clientX,
+                    clientY: touch.clientY
+                });
+                canvas.dispatchEvent(mouseEvent);
+            });
+
+            canvas.addEventListener('touchend', function(e) {
+                e.preventDefault();
+                const mouseEvent = new MouseEvent('mouseup', {});
+                canvas.dispatchEvent(mouseEvent);
+            });
+
+            // Clear canvas
+            document.getElementById('clearCanvas').addEventListener('click', function() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                strokeCount = 0;
+                wordCount = 0;
+                selectionCount = 0;
+                selectedWords = [];
+                updateStats();
+                addToHistory('Cleared canvas');
+                saveState();
+                showNotification('Canvas cleared!');
+            });
+
+            // Download canvas
+            document.getElementById('downloadCanvas').addEventListener('click', function() {
+                const link = document.createElement('a');
+                link.download = 'smart-board.png';
+                link.href = canvas.toDataURL();
+                link.click();
+                showNotification('Image downloaded!');
+            });
+
+            // Undo/Redo
+            document.getElementById('undoBtn').addEventListener('click', function() {
+                if (historyStep > 0) {
+                    historyStep--;
+                    ctx.putImageData(history[historyStep], 0, 0);
+                    addToHistory('Undo');
+                    showNotification('Undo successful');
+                }
+            });
+
+            document.getElementById('redoBtn').addEventListener('click', function() {
+                if (historyStep < history.length - 1) {
+                    historyStep++;
+                    ctx.putImageData(history[historyStep], 0, 0);
+                    addToHistory('Redo');
+                    showNotification('Redo successful');
+                }
+            });
+
+            // Save state for undo/redo
+            function saveState() {
+                historyStep++;
+                if (historyStep < history.length) {
+                    history.length = historyStep;
+                }
+                history.push(ctx.getImageData(0, 0, canvas.width, canvas.height));
+            }
+
+            // Update statistics
+            function updateStats() {
+                document.getElementById('strokeCount').textContent = strokeCount;
+                document.getElementById('wordCount').textContent = wordCount;
+                document.getElementById('selectionCount').textContent = selectionCount;
+            }
+
+            // Add to history
+            function addToHistory(action) {
+                const historyList = document.getElementById('historyList');
+                const time = new Date().toLocaleTimeString();
+                
+                const item = document.createElement('div');
+                item.className = 'list-group-item d-flex justify-content-between align-items-center';
+                item.innerHTML = `
+                    <span>${action}</span>
+                    <small class="text-muted">${time}</small>
+                `;
+                
+                if (historyList.children[0].textContent === 'No actions yet') {
+                    historyList.innerHTML = '';
+                }
+                
+                historyList.insertBefore(item, historyList.firstChild);
+                
+                // Keep only last 10 items
+                while (historyList.children.length > 10) {
+                    historyList.removeChild(historyList.lastChild);
+                }
+            }
+
+            // Show notification
+            function showNotification(message) {
+                const notification = document.getElementById('notification');
+                const notificationText = document.getElementById('notificationText');
+                
+                notificationText.textContent = message;
+                notification.classList.add('show');
+                
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                }, 3000);
+            }
+
+            // Share functionality
+            document.getElementById('shareBtn').addEventListener('click', function() {
+                const shareLink = `https://smartboard.app/board/${Math.random().toString(36).substr(2, 9)}`;
+                document.getElementById('shareLink').value = shareLink;
+                showNotification('Share link generated!');
+            });
+
+            document.getElementById('copyLink').addEventListener('click', function() {
+                const shareLink = document.getElementById('shareLink').value;
+                navigator.clipboard.writeText(shareLink).then(() => {
+                    showNotification('Link copied to clipboard!');
+                });
+            });
+
+            // Save board
+            document.getElementById('saveBtn').addEventListener('click', function() {
+                const boardData = {
+                    canvas: canvas.toDataURL(),
+                    timestamp: new Date().toISOString(),
+                    stats: {
+                        strokes: strokeCount,
+                        words: wordCount,
+                        selections: selectionCount
+                    }
+                };
+                
+                localStorage.setItem('smartBoardData', JSON.stringify(boardData));
+                showNotification('Board saved locally!');
+            });
+
+            // Load saved board if exists
+            const savedData = localStorage.getItem('smartBoardData');
+            if (savedData) {
+                const data = JSON.parse(savedData);
+                const img = new Image();
+                img.onload = function() {
+                    ctx.drawImage(img, 0, 0);
+                    addToHistory('Loaded saved board');
+                };
+                img.src = data.canvas;
+            }
+        });
+    </script>
 </body>
 </html>
-
